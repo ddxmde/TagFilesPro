@@ -4,7 +4,7 @@ Description
 @date    2020-09-27 02:50:22
 @version 1.0.0
 -->
-<template><div v-loading.fullscreen.lock="fullscreenLoading">
+<template><div v-loading.fullscreen.lock="fullscreenLoading" style="height:100%" ref="mainDom" >
     <div class="containerHeader">
         <el-button type="primary" icon="el-icon-upload2"
             size="small" @click="addFolder">添加文件夹</el-button>
@@ -57,6 +57,7 @@ export default {
   },
   mounted () {
     this.getFolders()
+    this.bindDrag()
   },
   methods: {
     getFolders () {
@@ -136,6 +137,30 @@ export default {
       if (rowIndex % 2 == 0) {
         return { 'background-color': '#f3f9f1', cursor: 'pointer', color: '#2e4e7e' }
       } else return { 'background-color': '#e0eee8', cursor: 'pointer', color: '#2e4e7e' }
+    },
+    bindDrag(){
+      const dragWrapper = this.$refs.mainDom
+      console.log(dragWrapper)
+      dragWrapper.addEventListener("drop",(e)=>{
+          e.preventDefault(); //阻止e的默认行为
+          const files = e.dataTransfer.files;
+          var filesPath = []
+          for(var i=0;i<files.length;i++){
+            filesPath.push(files[i].path)
+          }
+          ipcRenderer.send('get-files-info',filesPath)
+          ipcRenderer.once('get-files-info-response', (event, args) => {
+            if(args==null){
+                _that.openMessage('添加失败，请刷新重试')
+            }else{
+                this.$router.push({ name: 'AddFileTable', params: {addFiles:args } })
+            }
+          })
+      })
+      //这个事件也需要屏蔽
+      dragWrapper.addEventListener("dragover",(e)=>{
+          e.preventDefault();
+      })
     }
   }
 }

@@ -133,6 +133,23 @@ export default function bar() {
 		})
 	})
 
+	/**
+	 * 处理拖拽文件事件
+	*/
+	ipcMain.on('get-files-info', (event, filesPath) => {
+		service.getFilesByPaths(filesPath).then((rs)=>{
+			event.reply('get-files-info-response',rs)
+		})
+	})
+
+	/**
+	 * 移除单个文件- 从数据库
+	*/
+	ipcMain.on('remove-one-file', (event, fpath) => {
+		service.clearFilesByPaths([fpath]).then((rs) => {
+			event.reply('remove-one-file-response', rs)
+		})
+	})
 
 }
 

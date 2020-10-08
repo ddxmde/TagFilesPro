@@ -13,7 +13,7 @@ Description
             <template slot-scope="scope">
                 <div label-position="left"  class="table-expand">
                     <el-tag closable size="medium" type="danger" style="float:left;margin-left:10px;margin-top:10px;"
-                        v-for="(tag,taginx) in scope.row.tags" :key="tag"  @close="removeTag(scope.$index,tag,$event)">
+                        v-for="(tag,taginx) in scope.row.tags" :key="tag"  @close="removeTag(scope.$index,tag)">
                         {{tag}}
                     </el-tag>
                     <div style="width:100%;margin-top:10px;clear:both;">
@@ -63,11 +63,8 @@ Description
         <el-table-column fixed="right">
             <template slot-scope="scope">
             <el-button
-                size="mini" type="primary"
-                @click="handleOpen(scope.row)">打开</el-button>
-            <el-button
                 size="mini" type="warning"
-                @click="$emit('goparent',scope.row)">上级目录</el-button>
+                @click="handleRemove(scope.row)">移除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -79,7 +76,7 @@ const {
   ipcRenderer, shell
 } = window.require('electron')
 export default {
-  name: 'FileTable',
+  name: 'AddFileTable',
   data () {
     return {
       newTags: ''
@@ -92,7 +89,11 @@ export default {
     }
   },
   mounted () {
-    // this.getSysFolders()
+      this.folders = this.$route.params.addFiles
+      this.folders = this.folders.map(fe=>{
+          fe.tags = fe.tags.split(" ")
+          return fe
+      })
   },
   methods: {
     
@@ -156,36 +157,37 @@ export default {
         offset: 120
       })
     },
-    removeTag (index, tag , e) {
+    removeTag (index, tag) {
       var _that = this
       var oldtags = _that.folders[index].tags
       oldtags = oldtags.filter(t => {
         return t != tag
       })
       console.log(oldtags)
-      var oldFile = JSON.parse(JSON.stringify(_that.folders[index]))
       var updateTargrt = _that.folders[index]
-      _that.folders[index].tags = _that.ArrayToTags(oldtags)
-
-      ipcRenderer.send('update-tags', _that.folders[index])
+      updateTargrt.tags = _that.ArrayToTags(oldtags)
+      ipcRenderer.send('update-tags', updateTargrt)
       ipcRenderer.once('update-tags-response', (event, args) => {
         if (args) {
-          _that.folders[index].tags = oldtags
-          e.target.parentNode.remove()
+          updateTargrt.tags = oldtags
+          _that.folders[index] = updateTargrt
           _that.openMessage('更新成功')
         } else {
-          _that.folders[index] = oldFile
           _that.openMessage('更新失败', 'error')
           _that.$emit('goparent',_that.folders[index])
         }
       })
     },
-    handleOpen (row) {
-      if (row.type == '文件夹') {
-        this.$emit('openChild', row)
-      } else {
-        shell.showItemInFolder(row.path)
-      }
+    handleRemove (row) {
+        var _that = this
+        ipcRenderer.send('remove-one-file', row.path)
+        ipcRenderer.once('remove-one-file-response', (event, args) =>{
+            if(args){
+                _that.folders = _that.folders.filter(fp=>{
+                    return fp.path!=row.path
+                })
+            }
+        })
     }
   }
 }

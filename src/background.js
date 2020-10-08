@@ -65,7 +65,9 @@ function createWindow() {
     createProtocol('app')
     win.loadURL('app://./index.html')
   }
-  
+  win.on('closed', () => {
+    win = null
+  })
 }
 
 function createMiniWindow() {
@@ -89,9 +91,7 @@ function createMiniWindow() {
 
 
 //=============app window 事件监听============
-win.on('closed', () => {
-  win = null
-})
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -116,7 +116,7 @@ app.on('ready', async () => {
     }
   }
   const processArgs = process.argv
-  if (processArgs[1]) {
+  if (processArgs[2]) {
     //鼠标右键事件响应
     createMiniWindow()
     //win.webContents.openDevTools()

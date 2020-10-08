@@ -335,6 +335,27 @@ async function getFilesByFather(father) {
 }
 
 /**
+ * 根据path批量获取全部文件 
+ * @param fpaths 路径数组
+ * @return 全部数据
+ */
+async function getFilesByPaths(fpaths) {
+  var db = await getDb()
+  if (db) {
+    var results =[]
+    for(var fpath of fpaths){
+      var sql = "select * from files where path = ?"
+      var rs = await db.get(sql, fpath)
+      if(rs!=null||rs!=undefined)
+          results.push(rs)
+    }
+    await db.close()
+    return results
+  }
+  return null
+}
+
+/**
  * 根据tags搜索全部符合的文件
  * @return []
 */
@@ -441,6 +462,7 @@ module.exports.getFileByPath = getFileByPath
 module.exports.getChildrenByPath = getChildrenByPath
 module.exports.getFilesByFather = getFilesByFather
 module.exports.getFilesByTags = getFilesByTags
+module.exports.getFilesByPaths = getFilesByPaths
 module.exports.getFilesByTagsAndFolders = getFilesByTagsAndFolders
 module.exports.getAll = getAll
 
@@ -452,3 +474,4 @@ module.exports.deleteFilesByFather = deleteFilesByFather
 module.exports.deleteFoldersByPath = deleteFoldersByPath
 module.exports.deleteFoldersAllByPath = deleteFoldersAllByPath
 module.exports.clearAll = clearAll
+

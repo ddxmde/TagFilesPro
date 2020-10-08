@@ -340,11 +340,42 @@ async function getFileByPath(fpath){
             await DB.addFiles([finfo])
             return finfo
         }else{
-            file.path = fpath
             return file
         }
     }
 }
+
+/**
+ * getFileByPath 的批量操作
+ * 根据路径获取文件信息，如果存在数据库中，返回数据库中信息
+ * 如果不存在数据库中，返回文件信息并保存到数据库
+*/
+async function getFilesByPaths(fpaths) {
+    var result = []
+    var addFiles = []
+    fpaths = fpaths.filter(fp=>{
+        return fs.existsSync(fp)
+    })
+    var filesInDb = await DB.getFilesByPaths(fpaths)
+    filesInDb = filesInDb.map(file=>{
+        var finfo = FS.getFileInfo(file.path)
+        finfo.tags = file.tags
+        return finfo
+    })
+    var tmpObjarr = fpaths.map(fp=>{
+        return {path:fp}
+    })
+    var filesNotInDb = FS.leftDiff(tmpObjarr, filesInDb,'path')
+    filesNotInDb.map(fnd=>{
+        var finfo = FS.getFileInfo(fnd.path)
+        addFiles.push(finfo)
+    })
+    await DB.addFiles(addFiles)
+    return addFiles.concat(filesInDb)
+
+}
+
+
 //=================================
 
 module.exports.addFilesOfFolderById = addFilesOfFolderById
@@ -360,3 +391,4 @@ module.exports.CopyDir = CopyDir
 module.exports.deleteFilesFromDisk = deleteFilesFromDisk
 module.exports.deleteFolderFromDisk = deleteFolderFromDisk
 module.exports.getFileByPath = getFileByPath
+module.exports.getFilesByPaths = getFilesByPaths

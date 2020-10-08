@@ -81,7 +81,6 @@ export default {
     this.$router.push({ name: 'Main' })
     this.cur_path_index = '1'
     this.getSysFolders()
-    let args = remote.getGlobal('sharedObject').prop1
   },
   methods: {
     handleOpen (key, keyPath) {
