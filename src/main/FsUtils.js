@@ -1,3 +1,7 @@
+/**
+ * 本地文件工具库
+*/
+
 const fs = require('fs')
 const path = require('path')
 

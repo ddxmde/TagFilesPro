@@ -1,4 +1,9 @@
 
+/**
+ * 数据库实例 —— 通用
+ * 封装 get run all close  —— 返回Promise实例
+*/
+
 const fs = require('fs')
 const sqlite = require('sqlite3')
 

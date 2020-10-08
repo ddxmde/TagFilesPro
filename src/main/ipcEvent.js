@@ -1,3 +1,8 @@
+/**
+ * ipcMain - 事件监听列表 负责监听及处理 render Process 发送的事件
+*/
+
+
 export default function bar() {
 	//
 	const {
@@ -101,7 +106,9 @@ export default function bar() {
 	})
 
 
-
+	/**
+	 * 批量删除文件
+	*/
 	ipcMain.on('patch-delete', (event, args) => {
 		service.deleteFilesFromDisk(args).then(rs => {
 			event.reply('patch-delete-response', rs)

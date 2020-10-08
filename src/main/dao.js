@@ -2,7 +2,8 @@
 const DB = require('./database').DB //es5
 //import DB from './sqlite3'  //es6
 /**
- * 数据库处理库
+ * 数据库DAO
+ * 在这里配置- 数据库文件地址、表
  */
 const path = require('path')
 const isDevelopment = process.env.NODE_ENV !== 'production'
